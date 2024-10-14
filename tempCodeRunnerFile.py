@@ -17,10 +17,9 @@ def calculate_lab_attendance(lab_attended_classes, total_lab_classes):
     return min(lab_attendance_score, 100)  # Cap lab attendance score at 100%
 
 # Function to calculate assignment scores based on the selected scheme
-def calculate_assignments(assignments_columns, scheme):
+def calculate_assignments(assignments_columns, scheme, max_marks):
     if len(assignments_columns) == 0:  # Handle empty assignment columns
         return 0
-    max_marks = 20  # Hardcoded maximum marks for assignments
     if scheme == 'Best Of All':
         best_score = max(assignments_columns)
         return (best_score / max_marks) * 100  # Convert to percentage
@@ -33,10 +32,9 @@ def calculate_assignments(assignments_columns, scheme):
     return 0
 
 # Function to calculate quiz scores based on the selected scheme
-def calculate_quizzes(quizzes_columns, scheme):
+def calculate_quizzes(quizzes_columns, scheme, max_marks):
     if len(quizzes_columns) == 0:  # Handle empty quiz columns
         return 0
-    max_marks = 20  # Hardcoded maximum marks for quizzes
     if scheme == 'Best Of All':
         best_score = max(quizzes_columns)
         return (best_score / max_marks) * 100  # Convert to percentage
@@ -49,20 +47,11 @@ def calculate_quizzes(quizzes_columns, scheme):
     return 0
 
 # Function to calculate MST scores based on the selected scheme
-def calculate_mst(mst_columns, scheme):
+def calculate_mst(mst_columns, max_marks):
     if len(mst_columns) == 0:  # Handle empty MST columns
         return 0
-    max_mst_marks = 20  # Hardcoded MST maximum marks
-    if scheme == 'Best Of All':
-        best_score = max(mst_columns)
-        return (best_score / max_mst_marks) * 100  # Convert to percentage
-    elif scheme == 'Average':
-        avg_score = sum(mst_columns) / len(mst_columns)
-        return (avg_score / max_mst_marks) * 100  # Convert to percentage
-    elif scheme == 'Relative Grading':
-        max_mst_score = max(mst_columns)
-        return (sum(mst_columns) / (max_mst_score * len(mst_columns))) * 100
-    return 0
+    best_score = max(mst_columns)
+    return (best_score / max_marks) * 100  # Convert to percentage
 
 # Function to calculate the final Continuous Assessment (CW) score
 def calculate_cw(attendance_score, lab_attendance_score, assignment_score, quiz_score, mst_score, weights):
@@ -86,11 +75,13 @@ def main():
     # Load data from Excel
     df = pd.read_excel(file_path, sheet_name='Sheet1')
 
-    # User inputs for total values
+    # User inputs for maximum values and weights
     total_attendance_classes = int(input("Enter total number of attendance classes held: "))
     total_lab_attendance_classes = int(input("Enter total number of lab attendance classes held: "))
+    max_assignment_marks = float(input("Enter maximum assignment marks: "))  # Maximum marks for assignment
+    max_quiz_marks = float(input("Enter maximum quiz marks: "))  # Maximum marks for quiz
+    max_mst_marks = 20  # Maximum marks for MST
 
-    # Weights for each category
     weights = {
         'attendance': float(input("Enter weightage for attendance: ")) / 100,
         'lab_attendance': float(input("Enter weightage for lab attendance: ")) / 100,
@@ -109,7 +100,6 @@ def main():
     # User input for schemes
     assignment_scheme = input("Select assignment scheme (Best Of All / Average / Relative Grading): ")
     quiz_scheme = input("Select quiz scheme (Best Of All / Average / Relative Grading): ")
-    mst_scheme = input("Select MST scheme (Best Of All / Average / Relative Grading): ")
 
     # Create a list to store results
     results = []
@@ -129,13 +119,13 @@ def main():
         lab_attendance_score = calculate_lab_attendance(row[lab_attendance_cols].sum(), total_lab_attendance_classes)
         
         # Calculate assignment score
-        assignment_score = calculate_assignments(row[assignment_cols].tolist(), assignment_scheme)
+        assignment_score = calculate_assignments(row[assignment_cols].tolist(), assignment_scheme, max_assignment_marks)
         
         # Calculate quiz score
-        quiz_score = calculate_quizzes(row[quiz_cols].tolist(), quiz_scheme)
+        quiz_score = calculate_quizzes(row[quiz_cols].tolist(), quiz_scheme, max_quiz_marks)
 
         # Calculate MST score
-        mst_score = calculate_mst(row[mst_cols].tolist(), mst_scheme)
+        mst_score = calculate_mst(row[mst_cols].tolist(), max_mst_marks)
 
         # Debugging: Print the calculated scores for the student
         print(f"Calculated Attendance Score: {attendance_score:.2f}%")
@@ -165,6 +155,15 @@ def main():
     print("="*175)
     for result in results:
         print(f"{result['Name']:<25} {result['Roll No']:<15} {result['Classes Attended (%)']:<20} {result['Labs Attended (%)']:<20} {result['Assignment Marks Obtained (%)']:<30} {result['Quiz Marks Obtained (%)']:<25} {result['MST Marks Obtained (%)']:<25} {result['CW']:<10}")
+
+    # Create a DataFrame from the results
+    results_df = pd.DataFrame(results)
+
+    # Save results to Excel
+    output_path = "C:/Users/pandy/Downloads/attendance_results.xlsx"  # Change this to your desired output path
+    results_df.to_excel(output_path, index=False)
+
+    print(f"\nResults have been saved to '{output_path}'")
 
 if __name__ == "__main__":
     main()
