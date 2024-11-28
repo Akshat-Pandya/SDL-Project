@@ -116,12 +116,6 @@ def main():
 
     # Loop through each student and calculate scores
     for index, row in df.iterrows():
-        # Debugging: Print the row to see attendance data
-        print(f"\nProcessing student: {row['Name']}")
-        print(f"Attendance Data: {row[attendance_cols].tolist()}")
-        print(f"Lab Attendance Data: {row[lab_attendance_cols].tolist()}")
-        print(f"MST Data: {row[mst_cols].tolist()}")
-
         # Calculate attendance score
         attendance_score = calculate_attendance(row[attendance_cols].sum(), total_attendance_classes)
         
@@ -136,13 +130,6 @@ def main():
 
         # Calculate MST score
         mst_score = calculate_mst(row[mst_cols].tolist(), mst_scheme)
-
-        # Debugging: Print the calculated scores for the student
-        print(f"Calculated Attendance Score: {attendance_score:.2f}%")
-        print(f"Calculated Lab Attendance Score: {lab_attendance_score:.2f}%")
-        print(f"Assignment Score: {assignment_score:.2f}%")
-        print(f"Quiz Score: {quiz_score:.2f}%")
-        print(f"MST Score: {mst_score:.2f}%")
 
         # Calculate final Continuous Assessment score
         final_cw = calculate_cw(attendance_score, lab_attendance_score, assignment_score, quiz_score, mst_score, weights)
@@ -165,6 +152,12 @@ def main():
     print("="*175)
     for result in results:
         print(f"{result['Name']:<25} {result['Roll No']:<15} {result['Classes Attended (%)']:<20} {result['Labs Attended (%)']:<20} {result['Assignment Marks Obtained (%)']:<30} {result['Quiz Marks Obtained (%)']:<25} {result['MST Marks Obtained (%)']:<25} {result['CW']:<10}")
+
+    # Convert results to a DataFrame and save to an Excel file
+    results_df = pd.DataFrame(results)
+    output_file = "attendance_results.xlsx"
+    results_df.to_excel(output_file, index=False)
+    print(f"\nResults have been successfully saved to '{output_file}'.")
 
 if __name__ == "__main__":
     main()

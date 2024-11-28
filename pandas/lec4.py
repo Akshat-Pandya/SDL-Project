@@ -2,7 +2,7 @@
 # A Series is a one-dimensional array-like object in Pandas.
 # It can hold data of any type (integers, strings, floats, etc.).
 # Each value in a Series has a corresponding index.
-# It's like a column in a DataFrame but with a single data dimension.
+# It's like a column in a DataFrame but with a single data dimension.s
 
 import pandas as pd
 
